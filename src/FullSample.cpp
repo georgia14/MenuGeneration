@@ -203,8 +203,10 @@ void l1menu::FullSamplePrivateMembers::fillDataStructure( int selectDataInput )
 
 			  analysisDataFormat.Bxel.push_back( 0 ); //inputNtuple.l1upgrade_->tkEGBx.at( i ) );
 			  analysisDataFormat.Etel.push_back( inputNtuple.l1upgrade_->tkEGEt.at( i ) );
-			  analysisDataFormat.Phiel.push_back( phiINjetCoord( inputNtuple.l1upgrade_->tkEGPhi.at( i ) ) ); //PROBLEM: real value, trigger wants bin convert with phiINjetCoord
-			  analysisDataFormat.Etael.push_back( etaINjetCoord( inputNtuple.l1upgrade_->tkEGEta.at( i ) ) ); //PROBLEM: real value, trigger wants bin convert with etaINjetCoord
+			  analysisDataFormat.Phiel.push_back( phiINjetCoord( inputNtuple.l1upgrade_->tkEGPhi.at( i ) ) ); 
+			  //PROBLEM: real value, trigger wants bin convert with phiINjetCoord
+			  analysisDataFormat.Etael.push_back( etaINjetCoord( inputNtuple.l1upgrade_->tkEGEta.at( i ) ) ); 
+			  //PROBLEM: real value, trigger wants bin convert with etaINjetCoord
 			  
 				// Check whether this TKEG is located in the isolation list
 				bool isolated=false;
