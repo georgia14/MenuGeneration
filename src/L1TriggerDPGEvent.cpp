@@ -1,7 +1,7 @@
 #include "l1menu/L1TriggerDPGEvent.h"
 
 #include "l1menu/ITrigger.h"
-#include "UserCode/L1TriggerUpgrade/interface/L1AnalysisDataFormat.h"
+#include "L1Ntuple/L1TriggerUpgrade/interface/L1AnalysisDataFormat.h"
 
 namespace l1menu
 {
