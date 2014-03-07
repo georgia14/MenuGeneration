@@ -3,8 +3,8 @@
 <use name="root"/>
 <use name="protobuf"/>
 <use name="xerces-c" />
-<use name="UserCode/L1TriggerDPG"/>
-<use name="UserCode/L1TriggerUpgrade"/>
+<use name="L1Ntuple/L1TriggerDPG"/>
+<use name="L1Ntuple/L1TriggerUpgrade"/>
 <use name="FWCore/FWLite"/>
 <include_path path="interface"/>
 <export>
