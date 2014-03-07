@@ -1,0 +1,9 @@
+> l1menuCreateReducedSample L1Menu_v19m20_std.txt L1UpgradeNtuples_v22_NeutrinoGun_14TeV_PU140_list.txt
+
+> l1menuCreateRatePlots --output output_rates_PU140_v22.root reducedSample_new.proto L1Menu_v19m20_std.txt
+
+> l1menuFitMenu --rateplots output_rates_PU140_v22.root --output georgiaUnscaled.xml reducedSample.proto L1Menu_v19m20_std.txt 100
+
+> l1menuScaleMenuRates --rateplots output_rates_PU140_v22.root --muonscaling MuonScales_Scale_Iso50PU_3pt.root --datascaling output_rates_Fallback_Run2012C_ZeroBias_PU66_v22.root --montecarloscaling output_rates_FallBack_NeutrinoGun_8TeV_PU66_v22.root --offlinescaling L12Offline_Fallback_95-85_LowPtMu_v5_uncalibratedJets_updated.txt --format OLD georgiaUnscaled.xml
+
+(I had to replace "inf" with "0"s inside georgiaUnscaled.xml )
