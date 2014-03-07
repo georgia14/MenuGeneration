@@ -1,5 +1,6 @@
 #include "l1menu/FullSample.h"
 
+#include <iostream>
 #include <stdexcept>
 #include <cmath>
 
@@ -16,6 +17,8 @@
 #include "L1Ntuple/L1TriggerDPG/interface/L1AnalysisEventDataFormat.h"
 #include "L1Ntuple/L1TriggerDPG/interface/L1AnalysisGTDataFormat.h"
 #include "L1Ntuple/L1TriggerDPG/interface/L1AnalysisGMTDataFormat.h"
+
+using namespace std;
 
 namespace // Use the unnamed namespace for things only used in this file
 {
@@ -194,22 +197,23 @@ void l1menu::FullSamplePrivateMembers::fillDataStructure( int selectDataInput )
 
 			// NOTES:  Stage 1 has EG Relaxed and EG Isolated.  The isolated EG are a subset of the Relaxed.
 			//         so sort through the relaxed list and flag those that also appear in the isolated list.
-			for( unsigned int i=0; i<inputNtuple.l1upgrade_->nEG; i++ )
+		  //		  std::cout << "Entering tkEG loop of " << inputNtuple.l1upgrade_->nTkEG << " tkEG candidates" << std::endl;
+			for( unsigned int i=0; i<inputNtuple.l1upgrade_->nTkEG; i++ )
 			{
 
-				analysisDataFormat.Bxel.push_back( inputNtuple.l1upgrade_->egBx.at( i ) );
-				analysisDataFormat.Etel.push_back( inputNtuple.l1upgrade_->egEt.at( i ) );
-				analysisDataFormat.Phiel.push_back( phiINjetCoord( inputNtuple.l1upgrade_->egPhi.at( i ) ) ); //PROBLEM: real value, trigger wants bin convert with phiINjetCoord
-				analysisDataFormat.Etael.push_back( etaINjetCoord( inputNtuple.l1upgrade_->egEta.at( i ) ) ); //PROBLEM: real value, trigger wants bin convert with etaINjetCoord
-
-				// Check whether this EG is located in the isolation list
+			  analysisDataFormat.Bxel.push_back( 0 ); //inputNtuple.l1upgrade_->tkEGBx.at( i ) );
+			  analysisDataFormat.Etel.push_back( inputNtuple.l1upgrade_->tkEGEt.at( i ) );
+			  analysisDataFormat.Phiel.push_back( phiINjetCoord( inputNtuple.l1upgrade_->tkEGPhi.at( i ) ) ); //PROBLEM: real value, trigger wants bin convert with phiINjetCoord
+			  analysisDataFormat.Etael.push_back( etaINjetCoord( inputNtuple.l1upgrade_->tkEGEta.at( i ) ) ); //PROBLEM: real value, trigger wants bin convert with etaINjetCoord
+			  
+				// Check whether this TKEG is located in the isolation list
 				bool isolated=false;
 				bool fnd=false;
 				unsigned int isoEG=0;
-				while( !fnd && isoEG < inputNtuple.l1upgrade_->nIsoEG )
+				while( !fnd && isoEG < inputNtuple.l1upgrade_->nTkIsoEG )
 				{
-					if( inputNtuple.l1upgrade_->isoEGPhi.at( isoEG )==inputNtuple.l1upgrade_->egPhi.at( i )
-							&& inputNtuple.l1upgrade_->isoEGEta.at( isoEG )==inputNtuple.l1upgrade_->egEta.at( i ) )
+					if( inputNtuple.l1upgrade_->tkIsoEGPhi.at( isoEG )==inputNtuple.l1upgrade_->tkEGPhi.at( i )
+							&& inputNtuple.l1upgrade_->tkIsoEGEta.at( isoEG )==inputNtuple.l1upgrade_->tkEGEta.at( i ) )
 					{
 						isolated=true;
 						fnd=true;
@@ -222,6 +226,7 @@ void l1menu::FullSamplePrivateMembers::fillDataStructure( int selectDataInput )
 
 			// Note:  Taus are in the jet list.  Decide what to do with them. For now
 			//  leave them the there as jets (not even flagged..)
+
 			for( unsigned int i=0; i<inputNtuple.l1upgrade_->nJets; i++ )
 			{
 
@@ -229,32 +234,32 @@ void l1menu::FullSamplePrivateMembers::fillDataStructure( int selectDataInput )
 				bool duplicate=false;
 				for( unsigned int j=0; j<i; j++ )
 				{
-					if( inputNtuple.l1upgrade_->jetBx.at( i )==inputNtuple.l1upgrade_->jetBx.at( j )
-							&& inputNtuple.l1upgrade_->jetEt.at( i )==inputNtuple.l1upgrade_->jetEt.at( j )
-							&& inputNtuple.l1upgrade_->jetEta.at( i )==inputNtuple.l1upgrade_->jetEta.at( j )
-							&& inputNtuple.l1upgrade_->jetPhi.at( i )==inputNtuple.l1upgrade_->jetPhi.at( j ) )
-					{
-						duplicate=true;
-						//printf("Duplicate jet found and removed \n");
-					}
+				  if( inputNtuple.l1upgrade_->jetBx.at( i )==inputNtuple.l1upgrade_->jetBx.at( j )
+				      && inputNtuple.l1upgrade_->jetEt.at( i )==inputNtuple.l1upgrade_->jetEt.at( j )
+				      && inputNtuple.l1upgrade_->jetEta.at( i )==inputNtuple.l1upgrade_->jetEta.at( j )
+				      && inputNtuple.l1upgrade_->jetPhi.at( i )==inputNtuple.l1upgrade_->jetPhi.at( j ) )
+				    {
+				      duplicate=true;
+				      //printf("Duplicate jet found and removed \n");
+				    }
 				}
 
 				if( !duplicate )
 				{
-					analysisDataFormat.Bxjet.push_back( inputNtuple.l1upgrade_->jetBx.at( i ) );
-					analysisDataFormat.Etjet.push_back( inputNtuple.l1upgrade_->jetEt.at( i ) );
-					analysisDataFormat.Phijet.push_back( phiINjetCoord( inputNtuple.l1upgrade_->jetPhi.at( i ) ) ); //PROBLEM: real value, trigger wants bin convert with phiINjetCoord
-					analysisDataFormat.Etajet.push_back( etaINjetCoord( inputNtuple.l1upgrade_->jetEta.at( i ) ) ); //PROBLEM: real value, trigger wants bin convert with etaINjetCoord
-					analysisDataFormat.Taujet.push_back( false );
-					analysisDataFormat.isoTaujet.push_back( false );
-					//analysisDataFormat.Fwdjet.push_back(false); //COMMENT OUT IF JET ETA FIX
-
-					//if(fabs(inputNtuple.l1upgrade_->jetEta.at(i))>=3.0) printf("Et %f  Eta  %f  iEta  %f Phi %f  iPhi  %f \n",analysisDataFormat.Etjet.at(analysisDataFormat.Njet),inputNtuple.l1upgrade_->jetEta.at(i),analysisDataFormat.Etajet.at(analysisDataFormat.Njet),inputNtuple.l1upgrade_->jetPhi.at(i),analysisDataFormat.Phijet.at(analysisDataFormat.Njet));
-					//  Eta Jet Fix.  Some Jets with eta>3 has appeared in central jet list.  Move them by hand
-					//  This is a problem in Stage 2 Jet code.
-					(fabs( inputNtuple.l1upgrade_->jetEta.at( i ) )>=3.0) ? analysisDataFormat.Fwdjet.push_back( true ) : analysisDataFormat.Fwdjet.push_back( false );
-
-					analysisDataFormat.Njet++;
+				  analysisDataFormat.Bxjet.push_back( inputNtuple.l1upgrade_->jetBx.at( i ) );
+				  analysisDataFormat.Etjet.push_back( inputNtuple.l1upgrade_->jetEt.at( i ) );
+				  analysisDataFormat.Phijet.push_back( phiINjetCoord( inputNtuple.l1upgrade_->jetPhi.at( i ) ) ); //PROBLEM: real value, trigger wants bin convert with phiINjetCoord
+				  analysisDataFormat.Etajet.push_back( etaINjetCoord( inputNtuple.l1upgrade_->jetEta.at( i ) ) ); //PROBLEM: real value, trigger wants bin convert with etaINjetCoord
+				  analysisDataFormat.Taujet.push_back( false );
+				  analysisDataFormat.isoTaujet.push_back( false );
+				  //analysisDataFormat.Fwdjet.push_back(false); //COMMENT OUT IF JET ETA FIX
+				  
+				  //if(fabs(inputNtuple.l1upgrade_->jetEta.at(i))>=3.0) printf("Et %f  Eta  %f  iEta  %f Phi %f  iPhi  %f \n",analysisDataFormat.Etjet.at(analysisDataFormat.Njet),inputNtuple.l1upgrade_->jetEta.at(i),analysisDataFormat.Etajet.at(analysisDataFormat.Njet),inputNtuple.l1upgrade_->jetPhi.at(i),analysisDataFormat.Phijet.at(analysisDataFormat.Njet));
+				  //  Eta Jet Fix.  Some Jets with eta>3 has appeared in central jet list.  Move them by hand
+				  //  This is a problem in Stage 2 Jet code.
+				  (fabs( inputNtuple.l1upgrade_->jetEta.at( i ) )>=3.0) ? analysisDataFormat.Fwdjet.push_back( true ) : analysisDataFormat.Fwdjet.push_back( false );
+				  
+				  analysisDataFormat.Njet++;
 				}
 			}
 
@@ -321,22 +326,33 @@ void l1menu::FullSamplePrivateMembers::fillDataStructure( int selectDataInput )
 			}
 
 			// Fill energy sums  (Are overflow flags accessible in l1extra?)
-			for( unsigned int i=0; i<inputNtuple.l1upgrade_->nMet; i++ )
+			//			std::cout << "Entering tkMet loop of " << inputNtuple.l1upgrade_->nTkMet << " tkMet candidates" << std::endl;
+			for( unsigned int i=0; i<inputNtuple.l1upgrade_->nTkMet; i++ )
 			{
-				//if(inputNtuple.l1upgrade_->metBx.at(i)==0) {
-				analysisDataFormat.ETT=inputNtuple.l1upgrade_->et.at( i );
-				analysisDataFormat.ETM=inputNtuple.l1upgrade_->met.at( i );
-				analysisDataFormat.PhiETM=inputNtuple.l1upgrade_->metPhi.at( i );
+			  if (i==0){ //continue;
+			  //			  if(inputNtuple.l1upgrade_->tkMetBx.at(i)==0) {
+			    analysisDataFormat.ETT=inputNtuple.l1upgrade_->tkEt.at( i );
+			    analysisDataFormat.ETM=inputNtuple.l1upgrade_->tkMet.at( i );
+			    //			    std::cout << "At i = " << i << " TkMET= " << inputNtuple.l1upgrade_->tkMet.at( i ) << std::endl;
+			    analysisDataFormat.PhiETM=inputNtuple.l1upgrade_->tkMetPhi.at( i );
+			    //}
+			    //	}
+			    analysisDataFormat.OvETT=0; //not available in l1extra
+			    analysisDataFormat.OvETM=0; //not available in l1extra
+			  }
 			}
-			analysisDataFormat.OvETT=0; //not available in l1extra
-			analysisDataFormat.OvETM=0; //not available in l1extra
 
 			for( unsigned int i=0; i<inputNtuple.l1upgrade_->nMht; i++ )
 			{
+			  
 				if( inputNtuple.l1upgrade_->mhtBx.at( i )==0 )
 				{
 					analysisDataFormat.HTT=calculateHTT( analysisDataFormat ); //inputNtuple.l1upgrade_->ht.at(i) ;
-					analysisDataFormat.HTM=calculateHTM( analysisDataFormat ); //inputNtuple.l1upgrade_->mht.at(i) ;
+					analysisDataFormat.HTM=calculateHTM( analysisDataFormat );
+					  //inputNtuple.l1upgrade_->tkMet.at( 0 ); // Replaced MHT with tkMET
+					  //calculateHTM( analysisDataFormat ); //inputNtuple.l1upgrade_->mht.at(i) ;
+					//std::cout << "At i = " << i << " MHTbx = " << inputNtuple.l1upgrade_->mhtBx.at( i ) <<
+					//" and TkMHT = " << inputNtuple.l1upgrade_->tkMet.at( i ) << std::endl;
 					analysisDataFormat.PhiHTM=0.; //inputNtuple.l1upgrade_->mhtPhi.at(i) ;
 				}
 			}
@@ -344,16 +360,24 @@ void l1menu::FullSamplePrivateMembers::fillDataStructure( int selectDataInput )
 			analysisDataFormat.OvHTT=0; //not available in l1extra
 
 			// Get the muon information  from reEmul GMT
-			for( int i=0; i<inputNtuple.gmtEmu_->N; i++ )
+			//			for( int i=0; i<inputNtuple.gmtEmu_->N; i++ )
+			for( unsigned int i=0; i<inputNtuple.l1upgrade_->nTkMuons; i++ )
 			{
 
-				analysisDataFormat.Bxmu.push_back( inputNtuple.gmtEmu_->CandBx[i] );
-				analysisDataFormat.Ptmu.push_back( inputNtuple.gmtEmu_->Pt[i] );
-				analysisDataFormat.Phimu.push_back( inputNtuple.gmtEmu_->Phi[i] );
-				analysisDataFormat.Etamu.push_back( inputNtuple.gmtEmu_->Eta[i] );
-				analysisDataFormat.Qualmu.push_back( inputNtuple.gmtEmu_->Qual[i] );
-				analysisDataFormat.Isomu.push_back( false );
-				analysisDataFormat.Nmu++;
+			  analysisDataFormat.Bxmu.push_back( 0 );//inputNtuple.gmtEmu_->CandBx[i] );
+			  analysisDataFormat.Ptmu.push_back( inputNtuple.l1upgrade_->tkMuonEt.at(i) ); //gmtEmu_->Pt[i] );
+			  analysisDataFormat.Phimu.push_back( inputNtuple.l1upgrade_->tkMuonPhi.at(i) ); //gmtEmu_->Phi[i] );
+			  analysisDataFormat.Etamu.push_back( inputNtuple.l1upgrade_->tkMuonEta.at(i) ); //gmtEmu_->Eta[i] );
+			  analysisDataFormat.Qualmu.push_back( 4 ); //inputNtuple.gmtEmu_->Qual[i] );
+
+			  //			  analysisDataFormat.Bxmu.push_back( inputNtuple.gmtEmu_->CandBx[i] );
+			  //			  analysisDataFormat.Ptmu.push_back( inputNtuple.gmtEmu_->Pt[i] );
+			  //analysisDataFormat.Phimu.push_back( inputNtuple.gmtEmu_->Phi[i] );
+			  //analysisDataFormat.Etamu.push_back( inputNtuple.gmtEmu_->Eta[i] );
+			  //analysisDataFormat.Qualmu.push_back( inputNtuple.gmtEmu_->Qual[i] );
+			  
+			  analysisDataFormat.Isomu.push_back( false );
+			  analysisDataFormat.Nmu++;
 			}
 
 		break;
@@ -364,6 +388,7 @@ void l1menu::FullSamplePrivateMembers::fillDataStructure( int selectDataInput )
 		break;
 	}
 
+	//	std::cout << "Leaving fillDataStructure " << std::endl;
 	return;
 }
 
